@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>BSS Mob Time Tracker 0w0</title>
+    <style>
+        body { 
+            background-color: #2c2c2c; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            margin: 0; 
+            padding-top: 50px; 
+        }
+
+        #a4-page {
+            position: relative;
+            width: 1323px;
+            height: 2268px;
+            background-image: url('https://media.discordapp.net/attachments/1010241034007097367/1475753996588159078/bssmobtimer.png?ex=699ea282&is=699d5102&hm=e0cfa0a568cc85b2daea598540cddc4bb43603e6953233d55735cdfcdf777625&=&format=webp&quality=lossless'); 
+            background-size: contain;
+            background-repeat: no-repeat;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+
+        .timer-btn {
+            position: absolute;
+            width: 140px; 
+            height: 50px;
+            background: rgba(255, 235, 155, 0.95);
+            border: 3px solid #d4975d; 
+            border-radius: 8px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-weight: bold; 
+            font-size: 19px;
+            color: #2b1810; 
+            cursor: pointer;
+            text-align: center; 
+            line-height: 50px; 
+            user-select: none;
+            transition: transform 0.1s;
+        }
+
+        #reset-all {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            width: 180px;
+            height: 45px;
+            background: #b2e2b2; 
+            border: 3px solid #7cb37c;
+            border-radius: 12px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-weight: bold;
+            font-size: 16px;
+            color: #2b1810;
+            cursor: pointer;
+            line-height: 40px;
+            text-align: center;
+            z-index: 100;
+        }
+
+        #enable-sound {
+            position: absolute;
+            top: 75px; 
+            right: 40px;
+            width: 180px;
+            height: 45px;
+            background: #ffb7b7; 
+            border: 3px solid #f0a3a3;
+            border-radius: 12px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-weight: bold;
+            font-size: 15px;
+            color: #2b1810;
+            cursor: pointer;
+            line-height: 40px;
+            text-align: center;
+            z-index: 100;
+            transition: background 0.3s;
+        }
+
+        /* --- THE CUTE VOLUME BAR --- */
+        #volume-container {
+            position: absolute;
+            top: 130px;
+            right: 40px;
+            width: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            z-index: 100;
+        }
+
+        #vol-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 10px;
+            background: #ffb7b7;
+            border-radius: 5px;
+            outline: none;
+            border: 2px solid #f0a3a3;
+        }
+
+        #vol-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #f0a3a3;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #ffffff;
+        }
+
+        .vol-label {
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 12px;
+            color: #ffb7b7;
+            font-weight: bold;
+        }
+
+        .timer-btn:active, #reset-all:active, #enable-sound:active {
+            transform: scale(0.95);
+        }
+
+        /* --- COORDINATES --- */
+        #btn-mush     { top: 188px;  left: 621px; }
+        #btn-blue     { top: 259px;  left: 621px; }
+        #btn-clov     { top: 387px;  left: 474px; }
+        #btn-clov2    { top: 387px;  left: 674px; }
+        #btn-clov3    { top: 387px;  left: 918px; }
+        #btn-straw    { top: 524px;  left: 610px; }
+        #btn-spider   { top: 602px;  left: 610px; }
+        #btn-bamb     { top: 683px;  left: 610px; }
+        #btn-pineap   { top: 935px;  left: 470px; }
+        #btn-pineap2  { top: 935px;  left: 663px; }
+        #btn-snail    { top: 998px;  left: 610px; }
+        #btn-pine     { top: 1200px; left: 575px; }
+        #btn-were     { top: 1310px; left: 575px; }
+        #btn-rose     { top: 1432px; left: 575px; }
+        #btn-mount    { top: 1649px; left: 610px; }
+        #btn-coco     { top: 1880px; left: 610px; }
+
+        .ready { 
+            background: #ff4444 !important; 
+            color: white !important; 
+            animation: pulse 1s infinite; 
+        }
+
+        @keyframes pulse { 50% { opacity: 0.8; } }
+    </style>
+</head>
+<body>
+
+    <div id="a4-page">
+        <div id="reset-all" onclick="resetAllTimers()">reset all? >.></div>
+        <div id="enable-sound" onclick="toggleSound()">enable sound?</div>
+        
+        <div id="volume-container">
+            <span class="vol-label">vol! ♫</span>
+            <input type="range" id="vol-slider" min="0" max="1" step="0.05" value="0.5" oninput="updateVolume()">
+        </div>
+
+        <div id="btn-mush" class="timer-btn" onclick="startT('mush', 300)">start</div>
+        <div id="btn-blue" class="timer-btn" onclick="startT('blue', 300)">start</div>
+        <div id="btn-clov" class="timer-btn" onclick="startT('clov', 300)">start</div>
+        <div id="btn-clov2" class="timer-btn" onclick="startT('clov2', 300)">start</div>
+        <div id="btn-clov3" class="timer-btn" onclick="startT('clov3', 1800)">start</div>
+        <div id="btn-straw" class="timer-btn" onclick="startT('straw', 300)">start</div>
+        <div id="btn-spider" class="timer-btn" onclick="startT('spider', 1800)">start</div>
+        <div id="btn-bamb" class="timer-btn" onclick="startT('bamb', 300)">start</div>
+        <div id="btn-pineap" class="timer-btn" onclick="startT('pineap', 300)">start</div>
+        <div id="btn-pineap2" class="timer-btn" onclick="startT('pineap2', 1200)">start</div>
+        <div id="btn-snail" class="timer-btn" onclick="startT('snail', 345600)">start</div>
+        <div id="btn-pine" class="timer-btn" onclick="startT('pine', 1200)">start</div>
+        <div id="btn-were" class="timer-btn" onclick="startT('were', 3600)">start</div>
+        <div id="btn-rose" class="timer-btn" onclick="startT('rose', 1200)">start</div>
+        <div id="btn-mount" class="timer-btn" onclick="startT('mount', 3600)">start</div>
+        <div id="btn-coco" class="timer-btn" onclick="startT('coco', 129600)">start</div>
+    </div>
+
+    <script>
+        const intervals = {};
+        const notifySound = new Audio('https://cdn.discordapp.com/attachments/1010241034007097367/1475763687036944557/dragon-studio-notification-ping-335500.mp3?ex=699eab89&is=699d5a09&hm=82c58c7d2022d6b2abb3f7318f0d2b453b300d823efbfff8b35a2aefb8c365d7&');
+        let soundEnabled = false;
+
+        function updateVolume() {
+            notifySound.volume = document.getElementById('vol-slider').value;
+        }
+
+        function toggleSound() {
+            const btn = document.getElementById('enable-sound');
+            soundEnabled = !soundEnabled;
+            
+            if (soundEnabled) {
+                updateVolume(); // Ensure volume matches slider when turned on
+                notifySound.play();
+                btn.innerText = "sound is on! ^-^";
+                btn.style.background = "#ffd1dc";
+            } else {
+                btn.innerText = "sound is off.. °-°'";
+                btn.style.background = "#ffb7b7";
+            }
+        }
+
+        window.onload = () => {
+            updateVolume(); // Initial volume set
+            const saved = JSON.parse(localStorage.getItem('bss_timers_v2') || '{}');
+            const now = Date.now();
+            for (let id in saved) {
+                let remaining = Math.round((saved[id] - now) / 1000);
+                if (remaining > 0) {
+                    startT(id, remaining, false);
+                } else {
+                    const btn = document.getElementById('btn-' + id);
+                    if (btn) {
+                        btn.innerText = "ready ❤︎";
+                        btn.classList.add('ready');
+                    }
+                }
+            }
+        };
+
+        function startT(id, seconds, isNew = true) {
+            const btn = document.getElementById('btn-' + id);
+            if (!btn) return;
+            if (intervals[id]) clearInterval(intervals[id]);
+            btn.classList.remove('ready');
+
+            if (isNew) {
+                const endTime = Date.now() + (seconds * 1000);
+                const saved = JSON.parse(localStorage.getItem('bss_timers_v2') || '{}');
+                saved[id] = endTime;
+                localStorage.setItem('bss_timers_v2', JSON.stringify(saved));
+            }
+
+            let timeLeft = seconds;
+            intervals[id] = setInterval(() => {
+                let h = Math.floor(timeLeft / 3600);
+                let m = Math.floor((timeLeft % 3600) / 60);
+                let s = timeLeft % 60;
+                btn.innerText = (h > 0 ? h + ":" : "") + (m < 10 && h > 0 ? "0" + m : m) + ":" + (s < 10 ? "0" : "") + s;
+
+                if (timeLeft-- <= 0) {
+                    clearInterval(intervals[id]);
+                    btn.innerText = "ready ❤︎";
+                    btn.classList.add('ready');
+                    const saved = JSON.parse(localStorage.getItem('bss_timers_v2') || '{}');
+                    delete saved[id];
+                    localStorage.setItem('bss_timers_v2', JSON.stringify(saved));
+                    
+                    if (soundEnabled) {
+                        updateVolume(); // double check volume before playing
+                        notifySound.play().catch(()=>{});
+                    }
+                }
+            }, 1000);
+        }
+
+        function resetAllTimers() {
+            for (let id in intervals) clearInterval(intervals[id]);
+            localStorage.removeItem('bss_timers_v2');
+            document.querySelectorAll('.timer-btn').forEach(btn => {
+                btn.innerText = "start";
+                btn.classList.remove('ready');
+            });
+        }
+    </script>
+</body>
+</html>
