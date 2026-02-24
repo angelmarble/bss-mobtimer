@@ -80,7 +80,6 @@
             transition: background 0.3s;
         }
 
-        /* --- THE CUTE VOLUME BAR --- */
         #volume-container {
             position: absolute;
             top: 130px;
@@ -154,7 +153,7 @@
 <body>
 
     <div id="a4-page">
-        <div id="reset-all" onclick="resetAllTimers()">reset all? >.></div>
+        <div id="reset-all" onclick="resetAllTimers()">reset all? >_<</div>
         <div id="enable-sound" onclick="toggleSound()">enable sound?</div>
         
         <div id="volume-container">
@@ -176,8 +175,8 @@
         <div id="btn-pine" class="timer-btn" onclick="startT('pine', 1200)">start</div>
         <div id="btn-were" class="timer-btn" onclick="startT('were', 3600)">start</div>
         <div id="btn-rose" class="timer-btn" onclick="startT('rose', 1200)">start</div>
-        <div id="btn-mount" class="timer-btn" onclick="startT('mount', 3600)">start</div>
-        <div id="btn-coco" class="timer-btn" onclick="startT('coco', 129600)">start</div>
+        <div id="btn-mount" class="timer-btn" onclick="startT('mount', 1200)">start</div>
+        <div id="btn-coco" class="timer-btn" onclick="startT('coco', 1200)">start</div>
     </div>
 
     <script>
@@ -192,9 +191,8 @@
         function toggleSound() {
             const btn = document.getElementById('enable-sound');
             soundEnabled = !soundEnabled;
-            
             if (soundEnabled) {
-                updateVolume(); // Ensure volume matches slider when turned on
+                updateVolume();
                 notifySound.play();
                 btn.innerText = "sound is on! ^-^";
                 btn.style.background = "#ffd1dc";
@@ -204,68 +202,53 @@
             }
         }
 
-        window.onload = () => {
-            updateVolume(); // Initial volume set
+        // SYNC LOGIC: Check absolute time every second
+        function syncAll() {
             const saved = JSON.parse(localStorage.getItem('bss_timers_v2') || '{}');
             const now = Date.now();
-            for (let id in saved) {
-                let remaining = Math.round((saved[id] - now) / 1000);
-                if (remaining > 0) {
-                    startT(id, remaining, false);
-                } else {
-                    const btn = document.getElementById('btn-' + id);
-                    if (btn) {
+            
+            Object.keys(saved).forEach(id => {
+                const btn = document.getElementById('btn-' + id);
+                if (!btn) return;
+
+                const remaining = Math.round((saved[id] - now) / 1000);
+                
+                if (remaining <= 0) {
+                    if (!btn.classList.contains('ready')) {
                         btn.innerText = "ready ❤︎";
                         btn.classList.add('ready');
+                        if (soundEnabled) notifySound.play().catch(()=>{});
+                        // Don't delete from storage yet so refresh still shows 'ready'
                     }
+                } else {
+                    let h = Math.floor(remaining / 3600);
+                    let m = Math.floor((remaining % 3600) / 60);
+                    let s = remaining % 60;
+                    btn.innerText = (h > 0 ? h + ":" : "") + (m < 10 && h > 0 ? "0" + m : m) + ":" + (s < 10 ? "0" : "") + s;
+                    btn.classList.remove('ready');
                 }
-            }
-        };
+            });
+        }
 
-        function startT(id, seconds, isNew = true) {
-            const btn = document.getElementById('btn-' + id);
-            if (!btn) return;
-            if (intervals[id]) clearInterval(intervals[id]);
-            btn.classList.remove('ready');
-
-            if (isNew) {
-                const endTime = Date.now() + (seconds * 1000);
-                const saved = JSON.parse(localStorage.getItem('bss_timers_v2') || '{}');
-                saved[id] = endTime;
-                localStorage.setItem('bss_timers_v2', JSON.stringify(saved));
-            }
-
-            let timeLeft = seconds;
-            intervals[id] = setInterval(() => {
-                let h = Math.floor(timeLeft / 3600);
-                let m = Math.floor((timeLeft % 3600) / 60);
-                let s = timeLeft % 60;
-                btn.innerText = (h > 0 ? h + ":" : "") + (m < 10 && h > 0 ? "0" + m : m) + ":" + (s < 10 ? "0" : "") + s;
-
-                if (timeLeft-- <= 0) {
-                    clearInterval(intervals[id]);
-                    btn.innerText = "ready ❤︎";
-                    btn.classList.add('ready');
-                    const saved = JSON.parse(localStorage.getItem('bss_timers_v2') || '{}');
-                    delete saved[id];
-                    localStorage.setItem('bss_timers_v2', JSON.stringify(saved));
-                    
-                    if (soundEnabled) {
-                        updateVolume(); // double check volume before playing
-                        notifySound.play().catch(()=>{});
-                    }
-                }
-            }, 1000);
+        function startT(id, seconds) {
+            const endTime = Date.now() + (seconds * 1000);
+            const saved = JSON.parse(localStorage.getItem('bss_timers_v2') || '{}');
+            saved[id] = endTime;
+            localStorage.setItem('bss_timers_v2', JSON.stringify(saved));
+            syncAll(); // Update instantly
         }
 
         function resetAllTimers() {
-            for (let id in intervals) clearInterval(intervals[id]);
             localStorage.removeItem('bss_timers_v2');
             document.querySelectorAll('.timer-btn').forEach(btn => {
                 btn.innerText = "start";
                 btn.classList.remove('ready');
             });
         }
+
+        // Run the master sync clock 10 times a second for extreme accuracy
+        setInterval(syncAll, 1000);
+        window.onload = syncAll;
     </script>
 </body>
 </html>
